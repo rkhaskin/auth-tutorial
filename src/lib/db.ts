@@ -7,11 +7,11 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 // When hot reload fires on the next save, it will check if the prisma client has been set and use it, if it has been.
 // The reason we srore it in globalThis, is because global is not affected by hot reload
-export const prisma =
+export const db =
   globalForPrisma.prisma || new PrismaClient({ log: ["query"] });
 
 // for that reason, when we are not in production, store prisma client in a global object.
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
 /* if not for development, this would be goof for prod:
 export const db = new PrismaClient()

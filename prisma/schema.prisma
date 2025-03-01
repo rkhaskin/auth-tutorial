@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,40 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                Int       @id @default(autoincrement())
+  userId            Int?      @map("user_id")
+  type              String    @db.VarChar(60)
+  provider          String?   @db.VarChar(60)
+  providerAccountId String?   @map("provider_account_id") @db.VarChar(60)
+  refresh_token     String?   @db.VarChar(2048)
+  access_token      String?   @db.VarChar(2048)
+  expires_at        Int?
+  token_type        String?   @db.VarChar(60)
+  scope             String?   @db.VarChar(60)
+  id_token          String?   @db.VarChar(512)
+  session_state     String?   @db.VarChar(512)
+  createdAt         DateTime? @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime? @default(now()) @db.Timestamp(0)
+  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "account_user_id_fk")
+
+  @@unique([provider, providerAccountId], map: "account_uniq_1")
+  @@index([userId], map: "account_user_id_fk")
+  @@map("accounts")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(80)
+  email         String    @unique(map: "email") @db.VarChar(60)
+  emailVerified DateTime? @map("email_verified") @db.Timestamp(0)
+  image         String?   @db.VarChar(512)
+  createdAt     DateTime? @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime? @default(now()) @db.Timestamp(0)
+  password String?   @db.VarChar(512) @map("password_hash")
+  accounts      Account[]
+
+  @@map("users")
 }
