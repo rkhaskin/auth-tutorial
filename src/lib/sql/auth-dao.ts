@@ -1,5 +1,5 @@
-// import {pool} from "@/db/mariadb";
+// import { pool } from "@/db/mariadb";
 
-// export async function getUserByEmail(email: string) {
-//   const query = "select "
+// export async function getUserRoles(userId: number) {
+//   const query = ``
 // }
