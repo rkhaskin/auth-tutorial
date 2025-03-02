@@ -29,6 +29,11 @@ model Account {
   @@map("accounts")
 }
 
+enum UserRole {
+  Admin
+  User
+}
+
 model User {
   id            Int       @id @default(autoincrement())
   name          String    @db.VarChar(80)
@@ -37,7 +42,8 @@ model User {
   image         String?   @db.VarChar(512)
   createdAt     DateTime? @default(now()) @db.Timestamp(0)
   updatedAt     DateTime? @default(now()) @db.Timestamp(0)
-  password String?   @db.VarChar(512) @map("password_hash")
+  password      String?   @map("password_hash") @db.VarChar(512)
+  roleName      UserRole  @default(User) @map("role_name")
   accounts      Account[]
 
   @@map("users")
