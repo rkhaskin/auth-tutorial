@@ -1,8 +1,21 @@
 import Credentials from "next-auth/providers/credentials";
+import Github from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import type { NextAuthConfig } from "next-auth";
 import { LoginSchema } from "@/schemas";
 import { getUserByEmail } from "@/lib/auth-queries";
+
+type UserCleaned = {
+  id: string;
+  name: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  email: string;
+  emailVerified: Date | null;
+  image: string | null;
+  password: string;
+};
 
 /*
 we need this file to walk around Edge compatibility issue with prisma.
@@ -12,6 +25,14 @@ with prisma we can not use strategy database beacause iot does not work on the E
 
 export default {
   providers: [
+    Github({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     Credentials({
       async authorize(credentials) {
         const validatedFields = LoginSchema.safeParse(credentials);
@@ -27,7 +48,21 @@ export default {
 
           const passwordsMatch = await bcrypt.compare(password, user.password);
 
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+            // TODO find a way to not use this hack
+            const userCleaned: UserCleaned = {
+              id: user.id.toString(),
+              name: user.name,
+              createdAt: user.createdAt,
+              updatedAt: user.updatedAt,
+              email: user.email,
+              emailVerified: user.emailVerified,
+              image: user.image,
+              password: user.password,
+            };
+            return userCleaned;
+            //return user;
+          }
         }
 
         return null;

@@ -8,7 +8,7 @@ export const publicRoutes = ["/"];
  * An array of routes which require authentication
  * @type {string[]}
  */
-export const authRoutes = ["/auth/login", "/auth/register"];
+export const authRoutes = ["/auth/login", "/auth/register", "/auth/error"];
 
 /**
  * prefix for api authentication routes. Should not be blocked by authentication

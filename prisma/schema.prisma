@@ -17,8 +17,8 @@ model Account {
   access_token      String?   @db.VarChar(2048)
   expires_at        Int?
   token_type        String?   @db.VarChar(60)
-  scope             String?   @db.VarChar(60)
-  id_token          String?   @db.VarChar(512)
+  scope             String?   @db.VarChar(512)
+  id_token          String?   @db.VarChar(2048)
   session_state     String?   @db.VarChar(512)
   createdAt         DateTime? @default(now()) @db.Timestamp(0)
   updatedAt         DateTime? @default(now()) @db.Timestamp(0)
@@ -43,7 +43,7 @@ model User {
   createdAt     DateTime? @default(now()) @db.Timestamp(0)
   updatedAt     DateTime? @default(now()) @db.Timestamp(0)
   password      String?   @map("password_hash") @db.VarChar(512)
-  roleName      UserRole  @default(User) @map("role_name")
+  roleName      UserRole    @default(User) @map("role_name")
   accounts      Account[]
 
   @@map("users")
