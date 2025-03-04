@@ -43,7 +43,6 @@ export const {
     // update emailVerified
     async linkAccount({ user }) {
       if (!user.id) return;
-      console.log("aaaaaaaaaaaaaaaaa", user);
       await db.user.update({
         where: { id: parseInt(user.id) },
         data: { emailVerified: new Date() },
