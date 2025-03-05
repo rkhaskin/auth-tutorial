@@ -53,3 +53,12 @@ export async function updateUserVerifiedEmail(userId: number, email: string) {
     },
   });
 }
+
+export async function updateUserPassword(userId: number, password: string) {
+  await db.user.update({
+    where: { id: userId },
+    data: {
+      password,
+    },
+  });
+}

@@ -3,6 +3,9 @@ import {
   getVerificationTokenByEmail,
   deleteVerificationTokenById,
   createVerificationToken,
+  getPasswordResetTokenByEmail,
+  deletePasswordResetTokenById,
+  createPasswordResetToken,
 } from "@/lib/auth-queries";
 
 export async function generateVerificationToken(email: string) {
@@ -26,4 +29,27 @@ export async function generateVerificationToken(email: string) {
   );
 
   return verificationToken;
+}
+
+export async function generatePasswordResetToken(email: string) {
+  const token = uuidv4();
+  // expire in 1 hour: 3600 seconds * 1000 = milliseconds
+  const expires = new Date(new Date().getTime() + 3600 * 1000);
+
+  // check that we have a password reset token already
+  const existingToken = await getPasswordResetTokenByEmail(email);
+
+  // if one found, delete it before generating a new one
+  if (existingToken) {
+    deletePasswordResetTokenById(existingToken.id);
+  }
+
+  // create a new token
+  const passwordResetToken = await createPasswordResetToken(
+    email,
+    token,
+    expires
+  );
+
+  return passwordResetToken;
 }
