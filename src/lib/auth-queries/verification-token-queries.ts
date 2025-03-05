@@ -2,13 +2,13 @@ import { db } from "@/lib/db";
 
 export async function getVerificationTokenByEmail(email: string) {
   try {
-    const user = await db.verificationToken.findFirst({
+    const verificationToken = await db.verificationToken.findFirst({
       where: {
         email,
       },
     });
 
-    return user;
+    return verificationToken;
   } catch {
     return null;
   }
@@ -16,13 +16,13 @@ export async function getVerificationTokenByEmail(email: string) {
 
 export async function getVerificationTokenByToken(token: string) {
   try {
-    const user = await db.verificationToken.findUnique({
+    const verificationToken = await db.verificationToken.findUnique({
       where: {
         token,
       },
     });
 
-    return user;
+    return verificationToken;
   } catch {
     return null;
   }

@@ -3,6 +3,7 @@ export {
   getUserById,
   createUser,
   updateUserVerifiedEmail,
+  updateUserPassword,
 } from "@/lib/auth-queries/auth-queries";
 export {
   getVerificationTokenByEmail,
@@ -10,3 +11,10 @@ export {
   deleteVerificationTokenById,
   createVerificationToken,
 } from "@/lib/auth-queries/verification-token-queries";
+
+export {
+  createPasswordResetToken,
+  deletePasswordResetTokenById,
+  getPasswordResetTokenByEmail,
+  getPasswordResetTokenByToken,
+} from "@/lib/auth-queries/password-reset-token";
