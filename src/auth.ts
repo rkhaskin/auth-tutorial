@@ -50,18 +50,20 @@ export const {
     },
   },
   callbacks: {
-    // async signIn({ user }) {
-    //   if (!user.id) return false;
-    //   console.log("bbbbbbbbbbbb");
-    //   const userId = parseInt(user.id);
-    //   const existingUser = await getUserById(userId);
+    async signIn({ user, account }) {
+      console.log("aaaaaaaaaaaaaaaaa", account?.provider);
+      if (!user.id) return false;
 
-    //   if (!existingUser || !existingUser.emailVerified) {
-    //     return false;
-    //   }
+      // allow oauth sign in without email verification
+      if (account?.provider !== "credentials") return true;
 
-    //   return true;
-    // },
+      // check if existing user has a verified email
+      const existingUser = await getUserById(parseInt(user.id));
+
+      if (!existingUser?.emailVerified) return false;
+
+      return true;
+    },
     async session({ token, session }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
