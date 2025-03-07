@@ -45,6 +45,8 @@ model User {
   password      String?   @map("password_hash") @db.VarChar(512)
   roleName      UserRole    @default(User) @map("role_name")
   accounts      Account[]
+  isTwoFactorEnabled Boolean @default(false)
+  twoFactorConfirmation TwoFactorConfirmation?
 
   @@map("users")
 }
@@ -68,4 +70,23 @@ model PasswordResetToken {
 
   @@unique([email, token])
   @@map("password_reset_token")
+}
+
+model TwoFactorToken {
+
+  id     Int       @id @default(autoincrement())
+  email  String
+  token  String    @unique
+  expires DateTime
+
+  @@unique([email, token])
+  @@map("two_factor_token")
+}
+
+model TwoFactorConfirmation {
+  id     Int       @id @default(autoincrement())
+  userId Int    @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
+
+  @@map("two_factor_confirmation")
 }

@@ -18,3 +18,16 @@ export {
   getPasswordResetTokenByEmail,
   getPasswordResetTokenByToken,
 } from "@/lib/auth-queries/password-reset-token";
+
+export {
+  createTwoFactorToken,
+  deleteTwoFactorTokenById,
+  getTwoFactorTokenByEmail,
+  getTwoFactorTokenByToken,
+} from "@/lib/auth-queries/two-factor";
+
+export {
+  getTwoFactorConfirmationByUserId,
+  deleteTwoFactorConfirmationById,
+  createTwoFactorConfirmationToken,
+} from "@/lib/auth-queries/two-factor-confirmation";

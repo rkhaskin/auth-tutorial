@@ -29,7 +29,6 @@ export async function getPasswordResetTokenByToken(token: string) {
 }
 
 export async function deletePasswordResetTokenById(tokenId: number) {
-  console.log("aaaaaaaaaa", tokenId);
   return db.passwordResetToken.delete({
     where: {
       id: tokenId,
