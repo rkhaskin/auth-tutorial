@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import CardWrapper from "@/components/auth/card-wrapper";
 import { BeatLoader } from "react-spinners";
 import { useSearchParams } from "next/navigation";
@@ -44,7 +44,9 @@ export default function NewVerificationForm() {
     >
       <div className="flex w-fill items-center justify-center">
         {!error && !success && <BeatLoader />}
-        <FormSuccess message={success} />
+        <Suspense fallback="Loading...">
+          <FormSuccess message={success} />
+        </Suspense>
         <FormError message={error} />
       </div>
     </CardWrapper>

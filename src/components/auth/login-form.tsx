@@ -8,6 +8,7 @@ import CardWrapper from "@/components/auth/card-wrapper";
 import { LoginSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import {
   Form,
@@ -23,7 +24,6 @@ import FormSuccess from "@/components/form-success";
 
 import { login } from "@/actions/login";
 import { useTransition, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { postLog } from "@/logger/logWrapper";
 
 export function LoginForm() {
@@ -31,12 +31,6 @@ export function LoginForm() {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [showTwoFactor, setShowTwoFactor] = useState(false);
-
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use by different provider"
-      : "";
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -47,7 +41,6 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
-    console.log("1111111111111111");
     await postLog("login-form::submit");
     setError("");
     setSuccess("");
@@ -153,7 +146,9 @@ export function LoginForm() {
               </>
             )}
           </div>
-          <FormError message={error || urlError} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <FormError message={error} />
+          </Suspense>
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
             {showTwoFactor ? "Confirm" : "Login"}

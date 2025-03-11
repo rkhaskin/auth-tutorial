@@ -4,10 +4,12 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
 import { postLog } from "@/logger/logWrapper";
 import {
-  getUserById,
+  //getUserById,
   getTwoFactorConfirmationByUserId,
   deleteTwoFactorConfirmationById,
 } from "./lib/auth-queries";
+
+import { getUserById } from "@/lib/sql/auth-dao";
 import { UserRole } from "@prisma/client";
 
 declare module "next-auth" {
@@ -57,14 +59,20 @@ export const {
   // callbacks are invoked regardless whether user uses credentials or oauth to log in
   callbacks: {
     async signIn({ user, account }) {
-      await postLog(`callbacks auth::signIn::${account?.provider}`);
+      await postLog(
+        `callbacks auth::signIn::${account?.provider} user = ${JSON.stringify(
+          user
+        )}`
+      );
       if (!user.id) return false;
 
       // allow oauth sign in without email verification
       if (account?.provider !== "credentials") return true;
 
       // check if existing user has a verified email
+      //const existingUser = await getUserById(parseInt(user.id));
       const existingUser = await getUserById(parseInt(user.id));
+      console.log("ccccccccccccccc", JSON.stringify(existingUser));
 
       if (!existingUser?.emailVerified) return false;
 
