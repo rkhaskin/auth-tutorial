@@ -8,11 +8,14 @@ import {
   updateUserPassword,
   deletePasswordResetTokenById,
 } from "@/lib/auth-queries";
+import { fileLogger } from "@/logger/logger";
 
 export async function newPassword(
   values: z.infer<typeof NewPasswordSchema>,
   token: string | null
 ) {
+  fileLogger.info("actions::newPassword");
+
   if (!token) {
     return { error: "Missing token" };
   }

@@ -7,8 +7,11 @@ import { RegisterSchema } from "@/schemas";
 import { getUserByEmail, createUser } from "@/lib/auth-queries";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
+import { fileLogger } from "@/logger/logger";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
+  fileLogger.info("actions::register");
+
   const validatedFields = RegisterSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -32,7 +35,6 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   // TODO send verification token email
   const { email: verificationTokenEmail, token } =
     await generateVerificationToken(email);
-  console.log("bbbbbbbbbbbb", email);
   await sendVerificationEmail(verificationTokenEmail, token);
 
   return { success: "Confirmation email sent" };

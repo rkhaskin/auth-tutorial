@@ -19,8 +19,11 @@ import {
   generateTwoFactorToken,
 } from "@/lib/tokens";
 import { sendVerificationEmail, sendTwoFactorEmail } from "@/lib/mail";
+import { postLog } from "@/logger/logWrapper";
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
+  await postLog("actions::login");
+
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -86,6 +89,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   }
 
   try {
+    postLog("actions::login before calling signIn");
     await signIn("credentials", {
       email,
       password,
@@ -101,6 +105,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       }
     }
 
+    // must throw, otherwise will redirect will not happen to DEFAULT_LOGIN_REDIRECT
     throw error;
   }
 

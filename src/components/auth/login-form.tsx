@@ -24,6 +24,7 @@ import FormSuccess from "@/components/form-success";
 import { login } from "@/actions/login";
 import { useTransition, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { postLog } from "@/logger/logWrapper";
 
 export function LoginForm() {
   const [isPending, startTransition] = useTransition();
@@ -45,31 +46,35 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+    console.log("1111111111111111");
+    await postLog("login-form::submit");
     setError("");
     setSuccess("");
 
     startTransition(async () => {
-      login(values)
-        .then((data) => {
-          if (data?.error) {
-            form.reset();
-            setError(data.error);
-          }
+      await postLog("login-form::startTransition");
+      try {
+        const data = await login(values);
+        if (data?.error) {
+          form.reset();
+          setError(data.error);
+        }
 
-          if (data?.success) {
-            form.reset();
-            setSuccess(data.success);
-          }
+        if (data?.success) {
+          form.reset();
+          setSuccess(data.success);
+        }
 
-          if (data?.twoFactor) {
-            setShowTwoFactor(true);
-          }
+        if (data?.twoFactor) {
+          setShowTwoFactor(true);
+        }
 
-          setError(data?.error);
-          setSuccess(data?.success);
-        })
-        .catch(() => setError("Something went wrong"));
+        setError(data?.error);
+        setSuccess(data?.success);
+      } catch {
+        setError("Something went wrong");
+      }
     });
   };
 

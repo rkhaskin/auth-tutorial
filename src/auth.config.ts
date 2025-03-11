@@ -5,11 +5,12 @@ import bcrypt from "bcryptjs";
 import { NextAuthConfig } from "next-auth";
 import { LoginSchema } from "@/schemas";
 import { getUserByEmail } from "@/lib/auth-queries";
+import { postLog } from "@/logger/logWrapper";
 
 /*
 we need this file to walk around Edge compatibility issue with prisma.
 we will trigger the middleware from here and not from auth.ts
-with prisma we can not use strategy database beacause iot does not work on the Edge.
+with prisma we can not use strategy database because it does not work on the Edge.
 */
 
 export default {
@@ -24,11 +25,14 @@ export default {
     }),
     Credentials({
       async authorize(credentials) {
+        postLog("auth-config Credentials authorize");
+
         const validatedFields = LoginSchema.safeParse(credentials);
 
         if (validatedFields.success) {
           const { email, password } = validatedFields.data;
 
+          // we can use prisma db calls inside providers because this code does bot run on the Edge
           const user = await getUserByEmail(email);
           // pasword will be empty when user has been created through oauth
           if (!user || !user.password) {
