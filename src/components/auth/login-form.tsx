@@ -8,6 +8,7 @@ import CardWrapper from "@/components/auth/card-wrapper";
 import { LoginSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import {
   Form,
@@ -23,19 +24,13 @@ import FormSuccess from "@/components/form-success";
 
 import { login } from "@/actions/login";
 import { useTransition, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { postLog } from "@/logger/logWrapper";
 
 export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [showTwoFactor, setShowTwoFactor] = useState(false);
-
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use by different provider"
-      : "";
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -45,31 +40,34 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+    await postLog("login-form::submit");
     setError("");
     setSuccess("");
 
     startTransition(async () => {
-      login(values)
-        .then((data) => {
-          if (data?.error) {
-            form.reset();
-            setError(data.error);
-          }
+      await postLog("login-form::startTransition");
+      try {
+        const data = await login(values);
+        if (data?.error) {
+          form.reset();
+          setError(data.error);
+        }
 
-          if (data?.success) {
-            form.reset();
-            setSuccess(data.success);
-          }
+        if (data?.success) {
+          form.reset();
+          setSuccess(data.success);
+        }
 
-          if (data?.twoFactor) {
-            setShowTwoFactor(true);
-          }
+        if (data?.twoFactor) {
+          setShowTwoFactor(true);
+        }
 
-          setError(data?.error);
-          setSuccess(data?.success);
-        })
-        .catch(() => setError("Something went wrong"));
+        setError(data?.error);
+        setSuccess(data?.success);
+      } catch {
+        setError("Something went wrong");
+      }
     });
   };
 
@@ -148,7 +146,9 @@ export function LoginForm() {
               </>
             )}
           </div>
-          <FormError message={error || urlError} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <FormError message={error} />
+          </Suspense>
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
             {showTwoFactor ? "Confirm" : "Login"}

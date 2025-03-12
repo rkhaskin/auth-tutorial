@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -106,7 +106,9 @@ export function RegisterForm() {
               )}
             />
           </div>
-          <FormError message={error} />
+          <Suspense fallback="Loading...">
+            <FormError message={error} />
+          </Suspense>
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
             Create an account

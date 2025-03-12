@@ -5,8 +5,11 @@ import {
   getVerificationTokenByToken,
   deleteVerificationTokenById,
 } from "@/lib/auth-queries";
+import { fileLogger } from "@/logger/logger";
 
 export async function newVerification(token: string) {
+  fileLogger.info("actions::newVerifications");
+
   // get existing token from db
   const existingToken = await getVerificationTokenByToken(token);
 

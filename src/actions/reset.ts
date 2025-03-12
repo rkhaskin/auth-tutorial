@@ -5,8 +5,11 @@ import { ResetSchema } from "@/schemas";
 import { getUserByEmail } from "@/lib/auth-queries";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { generatePasswordResetToken } from "@/lib/tokens";
+import { fileLogger } from "@/logger/logger";
 
 export async function reset(values: z.infer<typeof ResetSchema>) {
+  fileLogger.info("actions::reset");
+
   const validatedValues = ResetSchema.safeParse(values);
 
   if (!validatedValues.success) {

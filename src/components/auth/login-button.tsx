@@ -18,7 +18,7 @@ export const LoginButton = ({
   };
 
   if (mode === "modal") {
-    return <span>TODO: Implement later</span>;
+    return <span>TODO: Implement later {asChild}</span>;
   }
 
   return (

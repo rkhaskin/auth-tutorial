@@ -1,7 +1,10 @@
 import authConfig from "@/auth.config";
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
+import { postLog } from "./logger/logWrapper";
 
+// we cannot use auth from auth.ts as we use PrismaAdapter, which cannot be user in Edge
+// extract auth middleware from auth.config.ts
 const { auth } = NextAuth(authConfig);
 
 import {
@@ -11,14 +14,28 @@ import {
   publicRoutes,
 } from "@/routes";
 
+// this auth is the one destructured from auth.config.js
 export default auth((req) => {
+  if (req.nextUrl.pathname.startsWith("/api/log")) {
+    return NextResponse.next();
+  }
+
+  async function log(msg: string) {
+    await postLog(msg);
+  }
+
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  log(`middleware::auth nextUrl = ${nextUrl}`);
+  log(`middleware::auth req = ${req.body}`);
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoutes = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
+  log(
+    `middleware:auth - isLoggedIn ${isLoggedIn}; isApiAuthRoute ${isApiAuthRoute}, isPublicRoutes ${isPublicRoutes}, isAuthRoute ${isAuthRoute}`
+  );
   /*
     order is important. Always put api/auth first
   */
@@ -26,6 +43,7 @@ export default auth((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
+      // need to pass nextUrl as a secong arg, so absolute url is build
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
     return NextResponse.next();

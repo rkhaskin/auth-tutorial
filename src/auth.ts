@@ -2,11 +2,14 @@ import NextAuth, { DefaultSession } from "next-auth";
 import authConfig from "@/auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
+import { postLog } from "@/logger/logWrapper";
 import {
-  getUserById,
+  //getUserById,
   getTwoFactorConfirmationByUserId,
   deleteTwoFactorConfirmationById,
 } from "./lib/auth-queries";
+
+import { getUserById } from "@/lib/sql/auth-dao";
 import { UserRole } from "@prisma/client";
 
 declare module "next-auth" {
@@ -53,14 +56,21 @@ export const {
       });
     },
   },
+  // callbacks are invoked regardless whether user uses credentials or oauth to log in
   callbacks: {
     async signIn({ user, account }) {
+      await postLog(
+        `callbacks auth::signIn::${account?.provider} user = ${JSON.stringify(
+          user
+        )}`
+      );
       if (!user.id) return false;
 
       // allow oauth sign in without email verification
       if (account?.provider !== "credentials") return true;
 
       // check if existing user has a verified email
+      //const existingUser = await getUserById(parseInt(user.id));
       const existingUser = await getUserById(parseInt(user.id));
 
       if (!existingUser?.emailVerified) return false;
@@ -80,6 +90,7 @@ export const {
       return true;
     },
     async session({ token, session }) {
+      await postLog("callbacks session");
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
@@ -91,6 +102,8 @@ export const {
       return session;
     },
     async jwt({ token }) {
+      await postLog("callbacks jwt");
+
       if (!token.sub) return token;
 
       const existingUser = await getUserById(parseInt(token.sub));
@@ -103,6 +116,9 @@ export const {
     },
   },
   adapter: PrismaAdapter(db),
+  // with prisma we cannot use "database" session strategy.
+  // database strategy: store session data in database
+  // jwt strategy: store session data in jwt
   session: { strategy: "jwt" },
   ...authConfig,
 });
