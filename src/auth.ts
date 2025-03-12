@@ -72,7 +72,6 @@ export const {
       // check if existing user has a verified email
       //const existingUser = await getUserById(parseInt(user.id));
       const existingUser = await getUserById(parseInt(user.id));
-      console.log("ccccccccccccccc", JSON.stringify(existingUser));
 
       if (!existingUser?.emailVerified) return false;
 

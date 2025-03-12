@@ -3,7 +3,7 @@ import { User } from "@prisma/client";
 import { fileLogger } from "@/logger/logger";
 
 export async function getUserById(userId: number): Promise<User | null> {
-  const query = `select id, names, email, email_verified, image, password_hash, role_name, isTwoFactorEnabled, createdAt, updatedAt 
+  const query = `select id, name, email, email_verified, image, password_hash, role_name, isTwoFactorEnabled, createdAt, updatedAt 
                     from users
                    where id = ?`;
   try {
