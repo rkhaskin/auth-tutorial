@@ -21,7 +21,10 @@ import {
 import { sendVerificationEmail, sendTwoFactorEmail } from "@/lib/mail";
 import { postLog } from "@/logger/logWrapper";
 
-export const login = async (values: z.infer<typeof LoginSchema>) => {
+export const login = async (
+  values: z.infer<typeof LoginSchema>,
+  callbackUrl?: string | null
+) => {
   await postLog("actions::login");
 
   const validatedFields = LoginSchema.safeParse(values);
@@ -90,10 +93,11 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
 
   try {
     postLog("actions::login before calling signIn");
+    console.log("aaaaaaaaaaaaa", callbackUrl);
     await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {

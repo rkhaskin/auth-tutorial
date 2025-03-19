@@ -25,8 +25,16 @@ import FormSuccess from "@/components/form-success";
 import { login } from "@/actions/login";
 import { useTransition, useState } from "react";
 import { postLog } from "@/logger/logWrapper";
+import { useSearchParams } from "next/navigation";
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+  const urlError =
+    searchParams.get("error") == "OAuthAccountNotLinked"
+      ? "Email already in use with different provider"
+      : "";
+
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -48,7 +56,7 @@ export function LoginForm() {
     startTransition(async () => {
       await postLog("login-form::startTransition");
       try {
-        const data = await login(values);
+        const data = await login(values, callbackUrl);
         if (data?.error) {
           form.reset();
           setError(data.error);
@@ -147,7 +155,7 @@ export function LoginForm() {
             )}
           </div>
           <Suspense fallback={<div>Loading...</div>}>
-            <FormError message={error} />
+            <FormError message={urlError || error} />
           </Suspense>
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>

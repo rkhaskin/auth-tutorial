@@ -19,7 +19,7 @@ export async function getUserById(userId: number): Promise<User | null> {
       image: user[0].image,
       password: user[0].password_hash,
       roleName: user[0].role_name,
-      isTwoFactorEnabled: user[0].isTwoFactorEnabled,
+      isTwoFactorEnabled: user[0].isTwoFactorEnabled === 1,
       createdAt: user[0].createdAt,
       updatedAt: user[0].updatedAt,
     };

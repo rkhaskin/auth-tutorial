@@ -49,7 +49,17 @@ export default auth((req) => {
     return NextResponse.next();
   }
   if (!isLoggedIn && !isPublicRoutes) {
-    return NextResponse.redirect(new URL("/auth/login", nextUrl));
+    // keep indicator of where I came from: http://localhost:3000/auth/login?%2Fsettings-client=
+    let callbackUrl = nextUrl.pathname;
+    if (nextUrl.search) {
+      callbackUrl += nextUrl.search;
+    }
+
+    const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+
+    return NextResponse.redirect(
+      new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl)
+    );
   }
 
   // returning null, means allow access

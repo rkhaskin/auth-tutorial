@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession } from "next-auth";
+import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
@@ -11,24 +11,25 @@ import {
 
 import { getUserById } from "@/lib/sql/auth-dao";
 import { UserRole } from "@prisma/client";
+import { getAccountByUserId } from "./lib/auth-queries/account";
 
-declare module "next-auth" {
-  /**
-   * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
-   */
-  interface Session {
-    user: {
-      /** The user's role */
-      role: UserRole;
-      /**
-       * By default, TypeScript merges new interface properties and overwrites existing ones.
-       * In this case, the default session user properties will be overwritten,
-       * with the new ones defined above. To keep the default session user properties,
-       * you need to add them back into the newly declared interface.
-       */
-    } & DefaultSession["user"];
-  }
-}
+// declare module "next-auth" {
+//   /**
+//    * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
+//    */
+//   interface Session {
+//     user: {
+//       /** The user's role */
+//       role: UserRole;
+//       /**
+//        * By default, TypeScript merges new interface properties and overwrites existing ones.
+//        * In this case, the default session user properties will be overwritten,
+//        * with the new ones defined above. To keep the default session user properties,
+//        * you need to add them back into the newly declared interface.
+//        */
+//     } & DefaultSession["user"];
+//   }
+// }
 
 // signIn and signOut functions can only be used on the server: server component or server actions
 export const {
@@ -99,6 +100,13 @@ export const {
         session.user.role = token.role as UserRole;
       }
 
+      if (session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+        session.user.name = token.name;
+        session.user.email = token.email as string;
+        session.user.isOauth = token.isOAuth as boolean;
+      }
+
       return session;
     },
     async jwt({ token }) {
@@ -110,7 +118,13 @@ export const {
 
       if (!existingUser) return token;
 
+      const existingAccount = await getAccountByUserId(existingUser.id);
+
+      token.isOAuth = !!existingAccount;
+      token.name = existingUser.name;
+      token.email = existingUser.email;
       token.role = existingUser.roleName;
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
 
       return token;
     },
